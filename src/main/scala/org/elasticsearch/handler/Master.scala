@@ -21,37 +21,32 @@ class Master(system: ActorSystem) extends Actor{
 
   def receive = {
     case Start => registerListener
-    case Stop => logger.info("=====>MASTER STOP"); client.disconnect
+    case Stop => client.disconnect
   }
 
   def registerListener {
-    logger.info("=====>REGISTERING LISTENER")
-
+    // track life cycle
     client.registerLifecycleListener(new BinaryLogClient.LifecycleListener() {
-
       def onConnect(client: BinaryLogClient) {
-        logger.info("===>CONNECTED")
+        logger.info("connected")
       }
-
       def onCommunicationFailure(client: BinaryLogClient, ex: Exception) {
-        logger.info("====>COMMUNCATIONFAIL {}", ex)
+        logger.info("communication failure {}", ex)
       }
-
       def onEventDeserializationFailure(client: BinaryLogClient, ex: Exception) {
-        logger.info("====>EVENTDESERIALIZEFAIL {}", ex)
+        logger.info("event deserialization failure {}", ex)
       }
-
       def onDisconnect(client: BinaryLogClient) {
-          println("====>DISCONNECTED")
+          println("disconnected")
       }
-
     })
-
+    // track events
     client.registerEventListener(new BinaryLogClient.EventListener() {
       def onEvent(event: Event) {
         logger.info("=====>RECEIVED EVENT {}", event)
       }
     })
+
     client.connect
   }
 }
